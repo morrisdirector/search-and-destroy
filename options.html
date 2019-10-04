@@ -76,12 +76,26 @@
                 <option value="false">Do not disable website key bindings</option>
                 <option value="true">Disable websites key bindings</option>
             </select></div>
+        <div class="row customs" id="fastest">
+            <select class="customDo">
+                <option value="fastest">Fastest speed</option>
+            </select>
+            <input class="customKey" type="text" value="" placeholder="press a key">
+            <input class="customValue" type="text" placeholder="value">
+            <select class="customForce">
+                <option value="false">Do not disable website key bindings</option>
+                <option value="true">Disable websites key bindings</option>
+            </select></div>
 
         <button id="add">Add New</button>
     </section>
 
     <section>
             <h3>Other</h3>
+		<div class="row">
+        <label for="skipYouTubeAds">Auto skip YouTube ads</label>
+        <input id="skipYouTubeAds" type="checkbox"/>
+      </div>
 		<div class="row">
         <label for="startHidden">Hide controller by default</label>
         <input id="startHidden" type="checkbox"/>

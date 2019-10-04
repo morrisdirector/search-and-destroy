@@ -9,6 +9,7 @@
       rememberSpeed: false, // default: false
       audioBoolean: false,  // default: false
       startHidden: false,   // default: false
+      skipYouTubeAds: true,   // default: true
       controllerOpacity: 0.3, // default: 0.3
       keyBindings: [],
       blacklist: `
@@ -68,7 +69,14 @@
         force: false,
         predefined: true
       }); // default: G
-      tc.settings.version = "0.5.3";
+      tc.settings.keyBindings.push({
+        action: "fastest",
+        key: Number(storage.fastKeyCode) || 72,
+        value: Number(storage.fastSpeed) || 5,
+        force: false,
+        predefined: true
+      }); // default: H
+      tc.settings.version = "1.0.0";
 
       chrome.storage.sync.set({
         keyBindings: tc.settings.keyBindings,
@@ -76,6 +84,7 @@
         displayKeyCode: tc.settings.displayKeyCode,
         rememberSpeed: tc.settings.rememberSpeed,
         audioBoolean: tc.settings.audioBoolean,
+        skipYouTubeAds: tc.settings.skipYouTubeAds,
         startHidden: tc.settings.startHidden,
         controllerOpacity: tc.settings.controllerOpacity,
         blacklist: tc.settings.blacklist.replace(regStrip, '')
@@ -85,6 +94,7 @@
     tc.settings.displayKeyCode = Number(storage.displayKeyCode);
     tc.settings.rememberSpeed = Boolean(storage.rememberSpeed);
     tc.settings.audioBoolean = Boolean(storage.audioBoolean);
+    tc.settings.skipYouTubeAds = Boolean(storage.skipYouTubeAds);
     tc.settings.startHidden = Boolean(storage.startHidden);
     tc.settings.controllerOpacity = Number(storage.controllerOpacity);
     tc.settings.blacklist = String(storage.blacklist);
@@ -106,6 +116,25 @@
     tc.settings.keyBindings.find(item => item.action === action)["value"] = value;
   }
 
+  function checkForYouTubeAds() {
+    var skipChecked = 0;
+    var skipInterval = setInterval(function() {
+      console.log("looking for skip button");
+      var skipButtons = document.getElementsByClassName("ytp-ad-skip-button");
+      if (skipButtons && skipButtons.length) {
+        if (skipButtons[0]) {
+          console.log("Found skip ads button -- clicking now!");
+          skipButtons[0].click();
+        }
+      }
+
+      skipChecked ++;
+      if (skipChecked === 10) {
+        clearInterval(skipInterval);
+      }
+    }, 500);
+  }
+
   function defineVideoController() {
     tc.videoController = function(target, parent) {
       if (target.dataset['vscid']) {
@@ -116,6 +145,10 @@
       this.parent = target.parentElement || parent;
       this.document = target.ownerDocument;
       this.id = Math.random().toString(36).substr(2, 9);
+
+      if (tc.settings.skipYouTubeAds) {
+        checkForYouTubeAds();
+      }
 
       // settings.speeds[] ensures that same source used across video tags (e.g. fullscreen on YT) retains speed setting
       // this.speed is a controller level variable that retains speed setting across source switches (e.g. video quality, playlist change)
@@ -135,6 +168,7 @@
       this.div=this.initializeControls();
 
       target.addEventListener('play', this.handlePlay = function(event) {
+        console.log("play");
         if (!tc.settings.rememberSpeed) {
           if (!tc.settings.speeds[target.src]) {
             tc.settings.speeds[target.src] = this.speed;
@@ -144,6 +178,11 @@
           tc.settings.speeds[target.src] = tc.settings.lastSpeed;
         }
         target.playbackRate = tc.settings.speeds[target.src];
+
+        if (tc.settings.skipYouTubeAds) {
+          checkForYouTubeAds();
+        }
+
       }.bind(this));
 
       target.addEventListener('ratechange', this.handleRatechange = function(event) {
@@ -484,7 +523,7 @@
           controller.classList.toggle('vsc-hidden');
         } else if (action === 'drag') {
           handleDrag(v, controller, e);
-        } else if (action === 'fast') {
+        } else if (action === 'fast' || action === 'fastest') {
           resetSpeed(v, value);
         } else if (action === 'pause') {
           pause(v);

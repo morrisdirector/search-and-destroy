@@ -1,16 +1,16 @@
 {
-  "name": "Video Speed Controller",
-  "short_name": "videospeed",
-  "version": "0.5.6",
+  "name": "Speed Controller with YouTube Ad Skipping",
+  "short_name": "sad",
+  "version": "1.0.0",
   "manifest_version": 2,
-  "description": "Speed up, slow down, advance and rewind any HTML5 video with quick shortcuts.",
+  "description": "Speed up, slow down, advance and rewind any HTML5 video with quick shortcuts.  Now with YouTube ad skipping!  Original project here:  https://github.com/igrigorik/videospeed.",
   "homepage_url": "https://github.com/igrigorik/videospeed",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": [ "activeTab", "storage" ],
+  "permissions": ["activeTab", "storage"],
   "options_page": "options.html",
   "browser_action": {
     "default_icon": {
@@ -20,9 +20,10 @@
     },
     "default_popup": "popup.html"
   },
-  "content_scripts": [{
+  "content_scripts": [
+    {
       "all_frames": true,
-      "matches": [ "http://*/*", "https://*/*", "file:///*" ],
+      "matches": ["http://*/*", "https://*/*", "file:///*"],
       "match_about_blank": true,
       "exclude_matches": [
         "https://plus.google.com/hangouts/*",
@@ -31,11 +32,9 @@
         "https://teamtreehouse.com/*",
         "http://www.hitbox.tv/*"
       ],
-      "css": [ "inject.css" ],
-      "js":  [ "inject.js" ]
+      "css": ["inject.css"],
+      "js": ["inject.js"]
     }
   ],
-  "web_accessible_resources": [
-    "inject.css", "shadow.css"
-  ]
+  "web_accessible_resources": ["inject.css", "shadow.css"]
 }

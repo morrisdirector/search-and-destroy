@@ -5,6 +5,7 @@ var tcDefaults = {
   displayKeyCode: 86,   // default: V
   rememberSpeed: false, // default: false
   audioBoolean: false, // default: false
+  skipYouTubeAds: true,   // default: true
   startHidden: false,   // default: false
   controllerOpacity: 0.3, // default: 0.3
   keyBindings: [
@@ -13,7 +14,8 @@ var tcDefaults = {
     {action: "rewind", key: 90, value: 10, force: false, predefined: true}, // Z
     {action: "advance", key: 88, value: 10, force: false, predefined: true}, // X
     {action: "reset", key: 82, value: 1, force: false, predefined: true}, // R
-    {action: "fast", key: 71, value: 1.8, force: false, predefined: true} // G
+    {action: "fast", key: 71, value: 1.8, force: false, predefined: true}, // G
+    {action: "fastest", key: 72, value: 5, force: false, predefined: true} // H
   ],
   blacklist: `
     www.instagram.com
@@ -152,6 +154,7 @@ function save_options() {
   var displayKeyCode = document.getElementById('displayKeyInput').keyCode;
   var rememberSpeed = document.getElementById('rememberSpeed').checked;
   var audioBoolean = document.getElementById('audioBoolean').checked;
+  var skipYouTubeAds = document.getElementById('skipYouTubeAds').checked;
   var startHidden = document.getElementById('startHidden').checked;
   var controllerOpacity = document.getElementById('controllerOpacity').value;
   var blacklist     = document.getElementById('blacklist').value;
@@ -163,6 +166,7 @@ function save_options() {
     displayKeyCode: displayKeyCode,
     rememberSpeed:  rememberSpeed,
     audioBoolean:  audioBoolean,
+    skipYouTubeAds:    skipYouTubeAds,
     startHidden:    startHidden,
     controllerOpacity:    controllerOpacity,
     keyBindings:    keyBindings,
@@ -183,6 +187,7 @@ function restore_options() {
     updateShortcutInputText('displayKeyInput', storage.displayKeyCode);
     document.getElementById('rememberSpeed').checked = storage.rememberSpeed;
     document.getElementById('audioBoolean').checked = storage.audioBoolean;
+    document.getElementById('skipYouTubeAds').checked = storage.skipYouTubeAds;
     document.getElementById('startHidden').checked = storage.startHidden;
     document.getElementById('controllerOpacity').value = storage.controllerOpacity;
     document.getElementById('blacklist').value = storage.blacklist;
