@@ -1,5 +1,5 @@
-# Video Speed Controller now with YouTube Ad Skipping!
-Thanks to the original project here: https://github.com/igrigorik/videospeed.  All the original features from that plugin plus automatic YouTube ad skipping!
+# Video Speed Controller with YouTube ad skipping!
+Thanks to the original project here: https://github.com/igrigorik/videospeed.  All the original features from that plugin plus automatic YouTube ad skipping option!
 
 # The science of accelerated playback
 
