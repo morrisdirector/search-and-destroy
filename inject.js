@@ -22,6 +22,9 @@
     }
   };
 
+  var skippingAd = false;
+  var savedUserSpeed = null;
+
   chrome.storage.sync.get(tc.settings, function (storage) {
     tc.settings.keyBindings = storage.keyBindings; // Array
     if (storage.keyBindings.length == 0) // if first initialization of 0.5.3
@@ -116,15 +119,30 @@
     tc.settings.keyBindings.find(item => item.action === action)["value"] = value;
   }
 
-  function checkForYouTubeAds() {
+  function checkForYouTubeAds(v, userSpeed) {
     var skipChecked = 0;
     var skipInterval = setInterval(function() {
-      console.log("looking for skip button");
+
+      console.log("looking for ads");
       var skipButtons = document.getElementsByClassName("ytp-ad-skip-button");
       if (skipButtons && skipButtons.length) {
         if (skipButtons[0]) {
           console.log("Found skip ads button -- clicking now!");
+          console.log("Button Object:", skipButtons[0]);
           skipButtons[0].click();
+        }
+      }
+      else {
+        // No button... now check for "video after ad box"
+        var videoAfterAdPreview = document.getElementsByClassName("ytp-ad-preview-container");
+        if (videoAfterAdPreview && videoAfterAdPreview.length) {
+          if (videoAfterAdPreview[0]) {
+            console.log("Video after ad -- speeding up!");
+            console.log("Preview Object:", videoAfterAdPreview[0]);
+            skippingAd = true;
+            savedUserSpeed = userSpeed;
+            v.playbackRate = 5.0;
+          }
         }
       }
 
@@ -146,8 +164,8 @@
       this.document = target.ownerDocument;
       this.id = Math.random().toString(36).substr(2, 9);
 
-      if (tc.settings.skipYouTubeAds) {
-        checkForYouTubeAds();
+      if (tc.settings.skipYouTubeAds && location.hostname === "www.youtube.com") {
+        checkForYouTubeAds(this.video, this.getSpeed());
       }
 
       // settings.speeds[] ensures that same source used across video tags (e.g. fullscreen on YT) retains speed setting
@@ -169,6 +187,17 @@
 
       target.addEventListener('play', this.handlePlay = function(event) {
         console.log("play");
+
+        console.log("skippingAd?", skippingAd);
+        console.log("savedUserSpeed?", savedUserSpeed);
+        if (skippingAd && savedUserSpeed) {
+          // Just completed an ad fast-forward; return to normal playback speed
+          console.log("Canceling fast forward");
+          this.video.playbackRate = savedUserSpeed;
+        }
+        savedUserSpeed = null;
+        skippingAd = false;
+
         if (!tc.settings.rememberSpeed) {
           if (!tc.settings.speeds[target.src]) {
             tc.settings.speeds[target.src] = this.speed;
@@ -179,8 +208,8 @@
         }
         target.playbackRate = tc.settings.speeds[target.src];
 
-        if (tc.settings.skipYouTubeAds) {
-          checkForYouTubeAds();
+        if (tc.settings.skipYouTubeAds && location.hostname === "www.youtube.com") {
+          checkForYouTubeAds(this.video, this.getSpeed());
         }
 
       }.bind(this));
