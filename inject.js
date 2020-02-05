@@ -153,39 +153,36 @@ function checkForYouTubeAds(v, userSpeed) {
   }, 500);
 }
 
-function checkForFoxNewsAds(v, userSpeed) {
-  debugger;
+function checkForFoxNewsAds() {
   var skipChecked = 0;
   var skipInterval = setInterval(function() {
     console.log('looking for ads');
-    var skipButtons = document.getElementsByClassName('ytp-ad-skip-button');
-    if (skipButtons && skipButtons.length) {
-      if (skipButtons[0]) {
-        console.log('Found skip ads button -- clicking now!');
-        console.log('Button Object:', skipButtons[0]);
-        skipButtons[0].click();
-      }
-    } else {
-      // No button... now check for "video after ad box"
-      var videoAfterAdPreview = document.getElementsByClassName(
-        'ytp-ad-preview-container'
-      );
-      if (videoAfterAdPreview && videoAfterAdPreview.length) {
-        if (videoAfterAdPreview[0]) {
-          console.log('Video after ad -- speeding up!');
-          console.log('Preview Object:', videoAfterAdPreview[0]);
-          skippingAd = true;
-          savedUserSpeed = userSpeed;
-          v.playbackRate = 5.0;
-        }
+    var adContainers = document.getElementsByClassName('amp-ad-container');
+    for (var i = 0; i <= 5; i++) {
+      if (adContainers[i]) {
+        // console.log('add containers ', i, ': ', adContainers[i]);
+        adContainers[i].remove();
       }
     }
-
     skipChecked++;
-    if (skipChecked === 10) {
+    if (skipChecked === 10 || !adContainers || adContainers.length === 0) {
       clearInterval(skipInterval);
     }
   }, 500);
+}
+
+function checkForVideoAds(video, speed) {
+  if (tc.settings.skipVideoAds) {
+    switch (location.hostname) {
+      case 'www.youtube.com':
+        checkForYouTubeAds(video, speed);
+        break;
+      case 'video.foxnews.com':
+      case 'static.foxnews.com':
+        checkForFoxNewsAds();
+        break;
+    }
+  }
 }
 
 function defineVideoController() {
@@ -201,17 +198,7 @@ function defineVideoController() {
       .toString(36)
       .substr(2, 9);
 
-    if (tc.settings.skipVideoAds) {
-      switch (location.hostname) {
-        case 'www.youtube.com':
-          checkForYouTubeAds(this.video, this.getSpeed());
-          break;
-        case 'video.foxnews.com':
-          checkForFoxNewsAds(this.video, this.getSpeed());
-          break;
-      }
-    }
-
+    checkForVideoAds(this.video, this.getSpeed());
     // settings.speeds[] ensures that same source used across video tags (e.g. fullscreen on YT) retains speed setting
     // this.speed is a controller level variable that retains speed setting across source switches (e.g. video quality, playlist change)
     this.speed = 1.0;
@@ -254,12 +241,7 @@ function defineVideoController() {
         }
         target.playbackRate = tc.settings.speeds[target.src];
 
-        if (
-          tc.settings.skipVideoAds &&
-          location.hostname === 'www.youtube.com'
-        ) {
-          checkForYouTubeAds(this.video, this.getSpeed());
-        }
+        checkForVideoAds(this.video, this.getSpeed());
       }.bind(this))
     );
 
